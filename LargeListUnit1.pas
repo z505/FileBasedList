@@ -4,7 +4,7 @@ interface
 
 uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants, System.Classes, Vcl.Graphics,
-  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, FileBasedList2;
+  Vcl.Controls, Vcl.Forms, Vcl.Dialogs, Vcl.StdCtrls, BigLists;
 
 type
   TForm1 = class(TForm)
@@ -79,7 +79,7 @@ begin
   LargeList := TBigIntegerList.create('tmplist.bin');
   try
     status('Adding 1,000,000 (million) integers to the list');
-    InitOneMillion;
+    InitOneMillion(LargeList);
     status('Accessing an integer, number 784023: ');
     status(LargeList.items[784023]);
   finally
