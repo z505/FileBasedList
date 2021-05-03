@@ -40,19 +40,22 @@ procedure TForm1.Button1Click(Sender: TObject);
 var
   Numbers: TBigIntegerPairList;
 begin
-  Numbers.Create('tmpnumbers.bin');
-  Numbers.Add(998, 765453);
-  Numbers.Add(4534875, 28934574);
-  Numbers.Add(844353, 1234334);
+  Numbers := TBigIntegerPairList.Create('tmpnumbers.bin');
+  try
+    Numbers.Add(998, 765453);
+    Numbers.Add(4534875, 28934574);
+    Numbers.Add(844353, 1234334);
 
-  status(Numbers.Items[0].First,',',Numbers.Items[0].Second);
+    status(Numbers.Items[0].First,',',Numbers.Items[0].Second);
 
-  status(Numbers.Items[1].First,',',Numbers.Items[1].Second);
+    status(Numbers.Items[1].First,',',Numbers.Items[1].Second);
 
-  status(Numbers.Items[2].First,',',Numbers.Items[2].Second);
+    status(Numbers.Items[2].First,',',Numbers.Items[2].Second);
 
-  status('Count: ', Numbers.Count);
-
+    status('Count: ', Numbers.Count);
+  finally
+    Numbers.Free; Numbers := nil;
+  end;
 end;
 
 end.
