@@ -2,7 +2,7 @@ object Form1: TForm1
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 369
+  ClientHeight = 419
   ClientWidth = 436
   Color = clBtnFace
   Font.Charset = DEFAULT_CHARSET
@@ -13,6 +13,13 @@ object Form1: TForm1
   OldCreateOrder = False
   PixelsPerInch = 120
   TextHeight = 16
+  object Label1: TLabel
+    Left = 220
+    Top = 350
+    Width = 99
+    Height = 16
+    Caption = 'Compare the two'
+  end
   object Memo1: TMemo
     Left = 18
     Top = 12
@@ -23,12 +30,21 @@ object Form1: TForm1
     TabOrder = 0
   end
   object Button1: TButton
-    Left = 346
-    Top = 334
+    Left = 326
+    Top = 328
     Width = 75
     Height = 25
-    Caption = 'Button1'
+    Caption = 'Fast'
     TabOrder = 1
     OnClick = Button1Click
+  end
+  object Button2: TButton
+    Left = 326
+    Top = 359
+    Width = 75
+    Height = 25
+    Caption = 'Slow'
+    TabOrder = 2
+    OnClick = Button2Click
   end
 end

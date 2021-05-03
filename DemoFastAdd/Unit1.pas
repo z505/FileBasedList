@@ -10,7 +10,10 @@ type
   TForm1 = class(TForm)
     Memo1: TMemo;
     Button1: TButton;
+    Button2: TButton;
+    Label1: TLabel;
     procedure Button1Click(Sender: TObject);
+    procedure Button2Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -43,11 +46,36 @@ begin
     memo1.lines.add('BigList item 250,000: ' + inttostr(BigList.items[250000]));
     memo1.lines.add('BigList item 0: ' + inttostr(BigList.items[0]));
     memo1.lines.add('BigList item 1: ' + inttostr(BigList.items[1]));
-
+    BigList.CloseFile;
   finally
     BigList.Free;
     BigList := nil;
   end;
+end;
+
+procedure TForm1.Button2Click(Sender: TObject);
+var
+  BigList: TBigByteList;
+  i: Integer;
+begin
+  BigList := TBigByteList.create('tmplist.bin');
+  try
+    for i := 0 to 1000000 do
+    begin
+      if i = 250000 then
+        BigList.Add(250)
+      else
+        BigList.Add(1);
+    end;
+    memo1.lines.add('BigList item 250,000: ' + inttostr(BigList.items[250000]));
+    memo1.lines.add('BigList item 0: ' + inttostr(BigList.items[0]));
+    memo1.lines.add('BigList item 1: ' + inttostr(BigList.items[1]));
+    BigList.CloseFile;
+  finally
+    BigList.Free;
+    BigList := nil;
+  end;
+
 end;
 
 end.
