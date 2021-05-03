@@ -5,6 +5,9 @@ interface
 uses
   Classes, SysUtils;
 
+const
+  FLUSH_CAPACITY = 10000;
+
 type
   //TIntegerSize = (szByte, szInt16, szInt32, szInt64);
 
@@ -16,6 +19,9 @@ type
   private
     FCount: int64;
     FFile: TFileStream;
+    FFlushed: boolean;
+    FCapAmount: integer;
+    FlushPosition: int64;
   public
     FileHandle: integer;
     property Count: Int64 read FCount write SetCount;
@@ -38,20 +44,27 @@ type
 
   end;
 
-   TBigByteList = class(TBigList)
-    procedure Add(number: byte);
-    procedure AddStr(number: string);
-    private
-      // function GetIntSize
-      function GetValue(const Index: int64): byte;
-      procedure SetValue(const Index: int64; const value: byte);
-    public
-      //property IntegerType: TIntegerSize; read GetIntSize write SetIntSize;
-      property Items[const Index: int64]: byte read GetValue write SetValue;
-      // property ItemsStr[const Number: Int64]: string read GetStrValue write SetStrValue;
-      procedure Init10MillionZero;
-  end;
+   TByteArrayBuf = array [1..FLUSH_CAPACITY] of byte;
 
+   TBigByteList = class(TBigList)
+     procedure Add(number: byte);
+     procedure AddStr(number: string);
+   private
+     FCapBuf: TByteArrayBuf;
+     // function GetIntSize
+     function GetValue(const Index: int64): byte;
+     procedure SetValue(const Index: int64; const value: byte);
+     procedure Flush;
+   public
+     //property IntegerType: TIntegerSize; read GetIntSize write SetIntSize;
+     property Items[const Index: int64]: byte read GetValue write SetValue;
+     // property ItemsStr[const Number: Int64]: string read GetStrValue write SetStrValue;
+     procedure Init10MillionZero;
+     procedure BeginUpdate;
+     procedure EndUpdate;
+     procedure AddFast(number: byte);
+
+   end;
 
   type
     TIntegerPair = record
@@ -103,6 +116,9 @@ begin
   FFile := TFileStream.create(FilePath, fmOpenReadWrite);
   FFile.Position := 0;
   FCount := 0;
+  FFlushed := false;
+  FCapAmount := 0;
+  FlushPosition := 0;
 end;
 
 procedure TBigList.CloseFile;
@@ -194,7 +210,7 @@ end;
 
 procedure TBigIntegerPairList.Add(First, Second: int64);
 begin
-  FFile.Position := SizeOf(First)*Count + SizeOf(Second)*Count;
+  FFile.Position := (SizeOf(First)*Count + SizeOf(Second)*Count) -1;
   inc(FCount);
   FFile.Write(First, SizeOf(First));
   FFile.Write(Second, SizeOf(Second));
@@ -223,8 +239,10 @@ begin
 end;
 
 procedure TBigIntegerPairList.SetValues(const index: int64; value: TIntegerPair);
+var
+  item: int64;
 begin
-  FFile.Position := (SizeOf(index)*index)*2;
+  FFile.Position := (SizeOf(item)*index)*2;
   FFile.write(value.First, SizeOf(value.First));
   FFile.write(value.Second, SizeOf(value.Second));
 end;
@@ -234,6 +252,44 @@ begin
   FFile.Position := SizeOf(number)*Count;
   inc(FCount);
   FFile.Write(number, SizeOf(number));
+end;
+
+procedure TBigByteList.BeginUpdate;
+begin
+
+end;
+
+procedure TBigByteList.Flush;
+var
+  item: byte;
+begin
+  if not FFlushed then
+  begin
+    FFile.Position := FlushPosition;
+    FFile.Write(FCapBuf, FCapAmount);
+    FlushPosition := (FlushPosition + FCapAmount) * SizeOf(item);
+    FFlushed := true;
+    FCapAmount := 0;
+
+  end;
+end;
+
+procedure TBigByteList.EndUpdate;
+begin
+  Flush;
+end;
+
+// use in combination with BeginUpdate and EndUpdate for speed.
+// This is bufferred using the CapString algorithm (stores a certain
+// capacity in memory buffer before writing)
+procedure TBigByteList.AddFast(number: byte);
+begin
+  inc(FCapAmount);
+  inc(FCount);
+  FCapBuf[FCapAmount] := number;
+  FFlushed := false;
+  if FCapAmount = FLUSH_CAPACITY then
+    Flush;
 end;
 
 procedure InitBuf10000(var buf: TArray10000Bytes);
